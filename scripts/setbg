@@ -1,0 +1,3 @@
+#!/bin/bash
+
+feh --bg-center --randomize $HOME/dotfiles/wallpapers/*

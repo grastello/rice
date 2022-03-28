@@ -1,0 +1,395 @@
++TITLE: Emacs
+#+AUTHOR: Gabriele Rastello
+
+#+STARTUP: overview
+
+#+BEGIN_QUOTE
+This is my Emacs. There are many like it, but this one is mine.
+#+END_QUOTE
+
+I've build countless Emacs(es) configurations from scratch, this is the latest one.
+Heavily inspired by [[https://github.com/snackon/Witchmacs][Witchmacs]] (I've shamelessly copied the org-file layout and a bunch of packages (and maybe even descriptions of packages)) but of course way more tailored to my needs (indeed this is not a configuration for "public use" like Witchmacs is).
+
+Works best with some non-intrusive window manager (key-wise) so you may have to adjust some of the window manager's key combinations in order to use this configuration as-is.
+
+* Theme and modeline
+Spacemacs theme and spacemacs modeline.
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
+#+end_src
+
+* Quality of Life
+Let's face it: some things of default Emacs are just annoying.
+Here we try to fix some and add other little (but big) things.
+
+** Backups
+I have having backup files all over my directories, but it also happens that sometimes I'm stupid enough to delete some very important non version-controlled file, so I like backups in the end. Just put them in a dedicated directory.
+#+BEGIN_SRC emacs-lisp
+  (setq backup-directory-alist '(("." . "~/emacs-backups"))
+	backup-by-copying      t
+	delete-old-versions    t
+	kept-new-versions      10
+	kept-old-versions      3)
+#+END_SRC
+
+** Conservative scrolling
+#+BEGIN_SRC emacs-lisp
+  (setq scroll-conservatively 100)
+#+END_SRC
+
+** Column-number-mode
+It is useful to have the column in the bar.
+#+begin_src emacs-lisp
+  (column-number-mode 1)
+#+end_src
+
+** Disable the bell
+That thing is annoying as few things in this world can be.
+#+BEGIN_SRC emacs-lisp
+  (setq ringbell-function 'ignore)
+#+END_SRC
+
+** Disable the default startup buffer
+Nothing is more comfortable that the good old =*scratch*=.
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-message t)
+#+END_SRC
+
+** Disable useless GUI
+You're not 3yo anymore.
+#+BEGIN_SRC emacs-lisp
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+#+END_SRC
+
+** Fringe
+#+BEGIN_SRC emacs-lisp
+  (fringe-mode '(10 . 1))
+#+END_SRC
+
+** Font size
+Default font size to 11pt.
+
+#+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'default nil :height 110)
+#+END_SRC
+
+** ibuffer
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+#+end_src
+
+** Parenthesis
+It helps to be able to quickly type them and to be able to tell immediately where matching pairs are located.
+#+BEGIN_SRC emacs-lisp
+  (show-paren-mode 1)
+
+  (setq electric-pair-pairs '(
+			      (?\{ . ?\})
+			      (?\( . ?\))
+			      (?\[ . ?\])
+			      (?\" . ?\")
+			      ))
+  (electric-pair-mode t)
+#+END_SRC
+
+** Sane buffer killing
+I don't kill buffers all the time, but when I do I always kill the current buffer and I want it dead as fast as possible.
+I'll regret my actions later.
+#+BEGIN_SRC emacs-lisp
+  (defun murder-current-buffer ()
+    "directly kill the current buffer"
+    (interactive)
+    (kill-buffer (current-buffer)))
+
+  (global-set-key (kbd "C-x k") #'murder-current-buffer)
+#+END_SRC
+
+** Sane window splitting
+If I decide that I want a new window, I want my point there.
+#+BEGIN_SRC emacs-lisp
+  (defun split-and-follow-horizontally ()
+    "split current window horizontally and move the cursor in it"
+    (interactive)
+    (split-window-below)
+    (balance-windows)
+    (other-window 1))
+
+  (defun split-and-follow-vertically ()
+    "split current window vertically and move the cursor in it"
+    (interactive)
+    (split-window-right)
+    (balance-windows)
+    (other-window 1))
+
+  (global-set-key (kbd "C-x 2") 'split-and-follow-horizontally)
+  (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
+#+END_SRC
+
+** yes-or-no to y-or-n
+This is probably the most annoying thing of all.
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+* Packages
+This is why you use Emacs.
+
+** async
+Use asynchronous processes when possible.
+#+BEGIN_SRC emacs-lisp
+  (use-package async
+    :ensure t)
+#+END_SRC
+
+** auto-package-update
+Keep your packages updated and remove some of the garbage that you'll end up creating.
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-package-update
+    :defer nil
+    :ensure t
+    :config
+    (setq auto-package-update-delete-old-versions t)
+    (setq auto-package-update-hide-results t)
+    (auto-package-update-maybe))
+#+END_SRC
+
+** company
+Completion.
+#+begin_src emacs-lisp
+  (use-package company
+    :ensure t
+    :config
+    (setq company-idle-delay 0)
+    (setq company-minimum-prefix-length 3)
+
+    (add-hook 'prog-mode-hook 'company-mode))
+
+  (use-package slime-company
+    :ensure t
+    :init
+    (require 'company)
+    (slime-setup '(slime-fancy slime-company)))
+#+end_src
+
+** common lisp
+Common lisp stuff.
+#+begin_src emacs-lisp
+  (use-package slime
+    :ensure t
+    :config
+    (setq inferior-lisp-program "sbcl")
+
+    ;; Enable more stuff.
+    (slime-setup '(slime-fancy slime-quicklisp slime-asdf)))
+#+end_src
+
+** dashboard
+A nice starting screen.
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
+
+    (setq dashboard-center-content t)
+    (setq dashboard-startup-banner 'logo)
+    (setq dashboard-items '((projects . 5)
+			    (recents  . 5))))
+#+end_src
+
+** dired
+The Emacs file manager.
+#+BEGIN_SRC emacs-lisp
+  (require 'dired)
+#+END_SRC
+
+Human readable, list all files.
+Also do not wrap lines.
+#+BEGIN_SRC emacs-lisp
+  (setq dired-listing-switches "-lha")
+
+  (defun my-dired-mode-hook ()
+    (setq truncate-lines t))
+
+  (add-hook 'dired-mode-hook #'my-dired-mode-hook)
+#+END_SRC
+
+Icons for dired.
+#+begin_src emacs-lisp
+  (use-package all-the-icons
+    :ensure t)
+
+  (use-package all-the-icons-dired
+    :ensure t
+    :config
+    (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+#+end_src
+
+Open files externally (with a handmade =xdg-open=).
+#+BEGIN_SRC emacs-lisp
+    (setq dired-open-alist
+	  '(("mkv"  . ("mpv"))
+	    ("mp4"  . ("mpv"))
+	    ("m4a"  . ("mpv" "--player-operation-mode=pseudo-gui"))
+	    ("mp3"  . ("mpv" "--player-operation-mode=pseudo-gui"))
+	    ("opus" . ("mpv" "--player-operation-mode=pseudo-gui"))
+	    ("pdf"  . ("zathura"))))
+
+    (cdr (cdr (assoc "mp3" dired-open-alist)))
+
+    (defun dired-open ()
+      "Open the file at point with `xdf-open'."
+      (interactive)
+      (let* ((filename  (dired-get-file-for-visit))
+	     (extension (file-name-extension filename))
+	     (program   (cadr (assoc extension dired-open-alist)))
+	     (arguments (cdr (cdr (assoc extension dired-open-alist)))))
+	(apply #'start-process
+	       "dired-open"
+	       nil
+	       program
+	       filename
+	       arguments)))
+
+    (define-key dired-mode-map (kbd "C-c C-x") #'dired-open)
+#+END_SRC
+
+** elfeed
+RSS feeds in Emacs.
+#+BEGIN_SRC emacs-lisp
+    (use-package elfeed
+      :ensure t
+      :config
+      (load-file "~/.emacs.d/feeds.el") ;; A man is allowed to have its secrets
+
+      (defun elfeed-and-update ()
+	"Launch elfeed and update"
+	(interactive)
+	(elfeed)
+	(elfeed-update))
+
+      ;; Youtube streaming.
+      (defun elfeed-youtube-stream ()
+	"Stream a youtube (probably even other site's) video in mpv."
+	(interactive)
+	(let* ((entry (elfeed-search-selected :single))
+	       (link  (elfeed-entry-link entry)))
+	  (start-process "elfeed youtube streaming"
+			 nil
+			 "mpv" link)
+	  (message "Starting streaming...")))
+
+      ;; Elfeed keybindings.
+      (define-key elfeed-search-mode-map "y" #'elfeed-youtube-stream)
+
+      :bind
+      ("C-c f" . elfeed-and-update))
+#+END_SRC
+
+** ido + smex
+#+begin_src emacs-lisp
+  (setq ido-enable-flex-matching t)
+  (setq ido-everywhere t)
+  (ido-mode 1)
+
+  ;; (use-package ido-vertical-mode
+  ;;   :ensure t
+  ;;   :config
+  ;;   (setq ido-vertical-define-keys 'C-n-and-C-p-only)
+  ;;   (setq ido-vertical-show-count t)
+  ;;   (ido-vertical-mode 1))
+
+  (use-package ido-completing-read+
+    :ensure t
+    :config
+    (ido-ubiquitous-mode 1))
+
+  (use-package smex
+    :ensure t
+    :config
+    (global-set-key (kbd "M-x") 'smex))
+#+end_src
+** latex stuff
+Some useful things for writing nice-looking documents.
+#+BEGIN_SRC emacs-lisp
+  (require 'tex-mode)
+
+  (use-package tex
+    :ensure auctex)
+
+  ;; prettify-symbols-mode for readable equations
+  (setq prettify-symbols-unprettify-at-point t)
+
+  (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
+
+  ;; Flyspell.
+  (add-hook 'TeX-mode-hook 'turn-on-flyspell)
+
+  ;; Easy insertion of math environments.
+  (defun latex-math-env ()
+    (interactive)
+    (insert "\\(\\)")
+    (backward-char 2))
+
+  (define-key TeX-mode-map (kbd "C-c m") #'latex-math-env)
+#+END_SRC
+
+** html stuff
+Some goodies for html editing.
+#+begin_src emacs-lisp
+  (add-hook 'html-mode-hook 'turn-on-flyspell)
+
+  ;; Easy insertion of math environments.
+  (defun html-math-env ()
+    (interactive)
+    (insert "\\(\\)")
+    (backward-char 2))
+
+  (require 'mhtml-mode)
+  (define-key mhtml-mode-map (kbd "C-c m") #'html-math-env)
+#+end_src
+
+** magit
+The comfiest way to use =git=.
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :ensure t
+    :config
+    (global-set-key (kbd "C-c g") #'magit-status))
+#+END_SRC
+
+** org-mode
+Always wrap lines for readability.
+#+BEGIN_SRC emacs-lisp
+  (setq org-startup-truncated nil)
+#+END_SRC
+
+No automatic indentation and always have flyspell mode up.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook
+	    (lambda () (electric-indent-local-mode -1)))
+  (add-hook 'org-mode-hook
+	    (lambda () (flyspell-mode 1)))
+#+END_SRC
+
+** projectile
+#+begin_src emacs-lisp
+  (use-package projectile
+    :ensure t
+    :config
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+    (projectile-mode +1))
+#+end_src
+
+** which-key
+Maybe useful if you forget your keybindings often (that is unlikely to happen through) but surprisingly useful for discovering things you would have never thought existed ().
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :ensure t
+    :init
+    (which-key-mode))
+#+END_SRC
