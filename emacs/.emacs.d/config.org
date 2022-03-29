@@ -12,8 +12,7 @@ Heavily inspired by [[https://github.com/snackon/Witchmacs][Witchmacs]] (I've sh
 
 Works best with some non-intrusive window manager (key-wise) so you may have to adjust some of the window manager's key combinations in order to use this configuration as-is.
 
-* Theme and modeline
-Spacemacs theme and spacemacs modeline.
+* modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :ensure t
@@ -368,12 +367,14 @@ Always wrap lines for readability.
   (setq org-startup-truncated nil)
 #+END_SRC
 
-No automatic indentation and always have flyspell mode up.
+Hooks.
 #+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook
 	    (lambda () (electric-indent-local-mode -1)))
   (add-hook 'org-mode-hook
 	    (lambda () (flyspell-mode 1)))
+  (add-hook 'org-mode-hook
+	    (lambda () (org-indent-mode 1)))
 #+END_SRC
 
 ** projectile
