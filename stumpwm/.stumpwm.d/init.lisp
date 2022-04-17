@@ -88,3 +88,6 @@
 (randomize-wallpaper)
 (run-shell-command "nm-applet")
 (run-shell-command "~/dotfiles/polybar/.config/polybar/launcher")
+
+(run-shell-command "transmission-gtk")
+
