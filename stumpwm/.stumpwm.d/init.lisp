@@ -18,7 +18,7 @@
 ;; Gaps.
 (load-module "swm-gaps")
 (setf swm-gaps:*outer-gaps-size* 15)
-(swm-gaps:toggle-gaps-on)
+; (swm-gaps:toggle-gaps-on)
 
 ;; Saves some time.
 (setf *timeout-wait* 2)
