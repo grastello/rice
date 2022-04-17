@@ -68,9 +68,10 @@
 (define-key *top-map* (kbd "s-4") "gselect 4")
 
 (clear-window-placement-rules)
-(define-frame-preference "media" (0 nil t :class "mpv"))
-(define-frame-preference "media" (0 nil t :class "Gimp"))
+(define-frame-preference "media"  (0 nil t :class "mpv"))
+(define-frame-preference "media"  (0 nil t :class "Gimp"))
 (define-frame-preference "social" (0 nil t :class "TelegramDesktop"))
+(define-frame-preference "misc"   (0 nil t :class "Transmission-gtk"))
 
 ;; Randomize background.
 (defcommand randomize-wallpaper () ()
